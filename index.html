@@ -1,5 +1,4 @@
-
-html_content = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -277,7 +276,10 @@ html_content = '''<!DOCTYPE html>
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .hidden { display: none !important; }
+        #whatsappBtn { background: #25D366 !important; color: white !important; border-color: #25D366 !important; }
+        #whatsappBtn:hover { filter: brightness(0.92); }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="container">
@@ -326,6 +328,17 @@ html_content = '''<!DOCTYPE html>
                     </div>
                     <div id="encryptAlert" class="alert"></div>
                     <div id="shareUrl" class="result-box"></div>
+                    <div class="btn-group" id="shareButtons" style="margin-top:0.75rem; display:none;">
+                        <button class="btn btn-success" id="whatsappBtn" style="background:#25D366; border-color:#25D366;">
+                            <span class="icon">💬</span> Share on WhatsApp
+                        </button>
+                        <button class="btn btn-outline" id="copyLinkBtn">
+                            <span class="icon">📋</span> Copy Link
+                        </button>
+                        <button class="btn btn-outline" id="smsBtn">
+                            <span class="icon">📱</span> Share via SMS
+                        </button>
+                    </div>
                     <div class="security-note">
                         <strong>⚠️ Security Note:</strong> The encryption key is embedded in the URL. Anyone with this link can decrypt the message. Share it only over trusted channels.
                     </div>
@@ -684,12 +697,30 @@ html_content = '''<!DOCTYPE html>
 
                 $('shareUrl').textContent = shareUrl;
                 show($('shareUrl'));
-                setAlert('encryptAlert', 'Message encrypted! Copy the link below to share.', 'success');
+                $('shareButtons').style.display = 'flex';
+                setAlert('encryptAlert', 'Message encrypted! Share via WhatsApp, SMS, or copy the link.', 'success');
+
+                // Wire up share buttons with current URL
+                $('whatsappBtn').onclick = () => {
+                    const waUrl = 'https://wa.me/?text=' + encodeURIComponent(shareUrl);
+                    window.open(waUrl, '_blank');
+                };
+                $('copyLinkBtn').onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(shareUrl);
+                        setAlert('encryptAlert', 'Link copied to clipboard!', 'success');
+                    } catch (e) {
+                        setAlert('encryptAlert', 'Copy failed. Select and copy manually.', 'warning');
+                    }
+                };
+                $('smsBtn').onclick = () => {
+                    const smsUrl = 'sms:?body=' + encodeURIComponent(shareUrl);
+                    window.location.href = smsUrl;
+                };
 
                 // Auto-copy
                 try {
                     await navigator.clipboard.writeText(shareUrl);
-                    setAlert('encryptAlert', 'Message encrypted! Link copied to clipboard.', 'success');
                 } catch (e) {
                     // clipboard failed, but link is shown
                 }
@@ -704,6 +735,7 @@ html_content = '''<!DOCTYPE html>
         $('clearEncryptBtn').addEventListener('click', () => {
             $('plaintext').value = '';
             hide($('shareUrl'));
+            $('shareButtons').style.display = 'none';
             clearAlert('encryptAlert');
         });
 
@@ -823,9 +855,4 @@ html_content = '''<!DOCTYPE html>
     })();
     </script>
 </body>
-</html>'''
-
-with open('/mnt/agents/output/aes-gcm-secure-messenger.html', 'w', encoding='utf-8') as f:
-    f.write(html_content)
-
-print("File saved successfully.")
+</html>
