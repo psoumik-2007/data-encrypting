@@ -1,4 +1,4 @@
-🔐 AES-GCM Secure Messenger
+🔐 AES-GCM Secure Messenger 
 A client-side encryption tool that lets you encrypt messages with AES-256-GCM and share them via URL. No server. No data leaves your browser.
 ________________________________________
 Quick Start
